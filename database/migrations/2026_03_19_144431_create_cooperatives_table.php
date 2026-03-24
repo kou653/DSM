@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('etat_sanitaire', function (Blueprint $table) {
+        Schema::create('cooperatives', function (Blueprint $table) {
             $table->id();
-            $table->string('etat');
+            $table->string('name')->unique();
+            $table->string('city');
+            $table->string('responsible_name')->nullable();
+            $table->string('contact_phone')->nullable();
+            $table->string('contact_email')->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('etat_sanitaire');
+        Schema::dropIfExists('cooperatives');
     }
 };

@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     protected $fillable = [
-        'Libellé',
-        'Partenaire',
+        'code',
+        'name',
+        'partner_name',
+        'status',
+        'description',
     ];
 
     public function users()
@@ -16,13 +19,13 @@ class Project extends Model
         return $this->belongsToMany(User::class, 'project_user');
     }
 
-    public function plants()
-    {
-        return $this->hasMany(Plant::class);
-    }
-
     public function parcelles()
     {
         return $this->hasMany(Parcelle::class);
+    }
+
+    public function monitorings()
+    {
+        return $this->hasMany(Monitoring::class);
     }
 }

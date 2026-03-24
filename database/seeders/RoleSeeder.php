@@ -2,31 +2,39 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        // Vérifier si les rôles existent déjà pour éviter les doublons
-        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['statut' => 'admin', 'description' => 'Administrateur Principal']);
-        $agriRole = Role::firstOrCreate(['name' => 'agriculteur'], ['statut' => 'agriculteur', 'description' => 'Agriculteur de terrain']);
-        $commandRole = Role::firstOrCreate(['name' => 'commanditaire'], ['statut' => 'commanditaire', 'description' => 'Commanditaire ou Sponsor']);
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['statut' => 'admin', 'description' => 'Administrateur principal']
+        );
 
-        // Créer l'utilisateur Administrateur par défaut
+        Role::firstOrCreate(
+            ['name' => 'agriculteur'],
+            ['statut' => 'agriculteur', 'description' => 'Agriculteur de terrain']
+        );
+
+        Role::firstOrCreate(
+            ['name' => 'commanditaire'],
+            ['statut' => 'commanditaire', 'description' => 'Commanditaire ou sponsor']
+        );
+
         $adminUser = User::firstOrCreate(
-            ['EMAIL' => 'admin@plateforme.com'],
+            ['email' => 'admin@plateforme.com'],
             [
-                'NOM COMPLET' => 'Super Admin',
-                'CODE_ACCES' => 'ADMIN001',
-                'password' => Hash::make('password') // Mot de passe par défaut
+                'nom_complet' => 'Super Admin',
+                'code_acces' => 'ADMIN001',
+                'password' => Hash::make('password'),
             ]
         );
 
-        // Lui assigner le rôle Admin s'il ne l'a pas déjà
         if (!$adminUser->hasRole('admin')) {
             $adminUser->assignRole($adminRole);
         }

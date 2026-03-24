@@ -12,9 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('projects', function (Blueprint $table) {
-            $table->id(); // N°ordre
-            $table->string('Libellé');
-            $table->string('Partenaire');
+            $table->id();
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->string('partner_name')->nullable();
+            $table->string('status')->default('draft');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

@@ -6,9 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class EtatSanitaire extends Model
 {
-    protected $table = 'etat_sanitaire';
-
     protected $fillable = [
-        'etat',
+        'name',
+        'description',
     ];
+
+    public function plants()
+    {
+        return $this->hasMany(Plant::class);
+    }
 }

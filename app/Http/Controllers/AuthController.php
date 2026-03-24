@@ -15,27 +15,61 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt(['EMAIL' => $request->email, 'password' => $request->password])) {
+        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             throw ValidationException::withMessages([
                 'email' => ['Les identifiants fournis sont incorrects.'],
             ]);
         }
 
-        /** @var \App\Models\User $user **/
+        /** @var \App\Models\User $user */
         $user = Auth::user();
+        $user->load('projects');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Connexion réussie',
+            'message' => 'Connexion reussie',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
-                'nom_complet' => $user->{'NOM COMPLET'},
-                'email' => $user->EMAIL,
-                'roles' => $user->getRoleNames(),
-            ]
+            'user' => $this->formatUserPayload($user),
         ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()?->delete();
+
+        return response()->json([
+            'message' => 'Deconnexion reussie',
+        ]);
+    }
+
+    public function me(Request $request)
+    {
+        $user = $request->user()->load('projects');
+
+        return response()->json([
+            'user' => $this->formatUserPayload($user),
+        ]);
+    }
+
+    private function formatUserPayload($user): array
+    {
+        return [
+            'id' => $user->id,
+            'nom_complet' => $user->nom_complet,
+            'email' => $user->email,
+            'code_acces' => $user->code_acces,
+            'roles' => $user->getRoleNames(),
+            'projects' => $user->projects->map(function ($project) {
+                return [
+                    'id' => $project->id,
+                    'code' => $project->code,
+                    'name' => $project->name,
+                    'partner_name' => $project->partner_name,
+                    'status' => $project->status,
+                ];
+            })->values(),
+        ];
     }
 }

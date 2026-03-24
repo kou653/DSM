@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('especes', function (Blueprint $table) {
             $table->id();
-            $table->string('NOM COMMUN');
-            $table->string('NOM SCIENTIFIQUE');
+            $table->string('common_name');
+            $table->string('scientific_name')->unique();
             $table->timestamps();
         });
     }

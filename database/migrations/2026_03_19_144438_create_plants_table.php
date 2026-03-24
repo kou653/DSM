@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('plants', function (Blueprint $table) {
             $table->id();
-            $table->string('CODE_PLANT')->unique;
-            $table->string('VILLE');
-            $table->string('COOPERATIVE');
-            $table->string('NOM_PARCELLE');
-            $table->decimal('gps_lat', 10, 7);
-            $table->decimal('gps_long', 10, 7);
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('code')->unique();
+            $table->string('ville');
+            $table->foreignId('parcelle_id')->constrained('parcelles')->cascadeOnDelete();
+            $table->foreignId('espece_id')->constrained('especes')->restrictOnDelete();
+            $table->foreignId('cooperative_id')->constrained('cooperatives')->restrictOnDelete();
+            $table->foreignId('etat_sanitaire_id')->nullable()->constrained('etat_sanitaires')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->decimal('gps_lat', 10, 7)->nullable();
+            $table->decimal('gps_long', 10, 7)->nullable();
+            $table->date('planted_at')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

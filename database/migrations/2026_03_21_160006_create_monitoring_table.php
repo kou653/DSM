@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('monitoring', function (Blueprint $table) {
+        Schema::create('monitorings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('Espece')->constrained('especes')->onDelete('cascade');
-            $table->integer('Nb plantés');
-            $table->integer('Nb vivants');
-            $table->integer('Nb morts');
+            $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->cascadeOnDelete();
+            $table->foreignId('espece_id')->constrained('especes')->restrictOnDelete();
+            $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
+            $table->date('monitored_at');
+            $table->unsignedInteger('plants_planted')->default(0);
+            $table->unsignedInteger('plants_alive')->default(0);
+            $table->unsignedInteger('plants_dead')->default(0);
+            $table->text('mortality_cause')->nullable();
+            $table->text('observation')->nullable();
             $table->timestamps();
-            // $table->foreignId('Réalisé par')->constrained('users')->onDelete('cascade');
-            
         });
     }
 
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('monitoring');
+        Schema::dropIfExists('monitorings');
     }
 };

@@ -13,13 +13,18 @@ return new class extends Migration
     {
         Schema::create('parcelles', function (Blueprint $table) {
             $table->id();
-            $table->integer('CODE')->unique();
-            $table->string('VILLE');
-            $table->string('COOPERATIVE');
-            $table->string('LIBELLE');
-            $table->string('SUPERFICIE');
-            $table->string('RESPONSABLE');
-            $table->integer('CONTACT');
+            $table->string('code')->unique();
+            $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->foreignId('cooperative_id')->constrained('cooperatives')->restrictOnDelete();
+            $table->string('name');
+            $table->string('city');
+            $table->decimal('surface_area', 12, 2)->nullable();
+            $table->string('surface_unit')->default('ha');
+            $table->string('responsible_name')->nullable();
+            $table->string('contact_phone')->nullable();
+            $table->decimal('gps_lat', 10, 7)->nullable();
+            $table->decimal('gps_long', 10, 7)->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

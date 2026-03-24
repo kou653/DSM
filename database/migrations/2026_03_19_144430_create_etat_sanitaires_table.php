@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gestion_cooperative', function (Blueprint $table) {
+        Schema::create('etat_sanitaires', function (Blueprint $table) {
             $table->id();
-            $table->string('Libellé'); // Enlever après si pas nécessaire
-            $table->string('Ville');   // Enlever après si pas nécessaire
-            
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('gestion_cooperative');
+        Schema::dropIfExists('etat_sanitaires');
     }
 };
