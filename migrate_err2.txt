@@ -1,0 +1,26 @@
+
+   INFO  Running migrations.  
+
+  2026_03_19_140246_create_permission_tables  23.06ms FAIL
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42P07]: Duplicate table: 7 ERREUR:  la relation « roles » existe déjà (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: DSM_db, SQL: create table "roles" ("id" bigserial not null primary key, "name" varchar(255) not null, "guard_name" varchar(255) not null, "created_at" timestamp(0) without time zone null, "updated_at" timestamp(0) without time zone null))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕ 
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+      PDOException::("SQLSTATE[42P07]: Duplicate table: 7 ERREUR:  la relation « roles » existe déjà")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+      PDOStatement::execute()
+

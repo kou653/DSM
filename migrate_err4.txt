@@ -1,0 +1,23 @@
+
+  Dropping all tables  56.74ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table  11.04ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table  24.98ms DONE
+  0001_01_01_000001_create_cache_table  15.46ms DONE
+  0001_01_01_000002_create_jobs_table  20.39ms DONE
+  2026_03_19_135813_create_personal_access_tokens_table  11.43ms DONE
+  2026_03_19_140246_create_permission_tables  40.65ms DONE
+  2026_03_19_144211_create_project_table  5.79ms DONE
+  2026_03_19_144212_create_project_user_table  6.87ms DONE
+  2026_03_19_144327_create_especes_table  6.93ms DONE
+  2026_03_19_144438_create_plants_table  9.63ms DONE
+  2026_03_19_144558_create_etat_sanitaire_table  3.89ms DONE
+  2026_03_19_144806_create_parcelles_table  7.66ms DONE
+  2026_03_21_160006_create_monitoring_table  3.89ms DONE
+  2026_03_21_160121_create_gestion_cooperative_table  3.85ms DONE
+

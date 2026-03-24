@@ -1,0 +1,26 @@
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table  16.31ms FAIL
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42P01]: Undefined table: 7 ERREUR:  la relation « roles » n'existe pas (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: DSM_db, SQL: alter table "users" add constraint "users_role_id_foreign" foreign key ("role_id") references "roles" ("id") on delete cascade)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕ 
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+      PDOException::("SQLSTATE[42P01]: Undefined table: 7 ERREUR:  la relation « roles » n'existe pas")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+      PDOStatement::execute()
+

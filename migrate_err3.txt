@@ -1,0 +1,37 @@
+
+  Dropping all tables  63.72ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table  12.63ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table  31.65ms DONE
+  0001_01_01_000001_create_cache_table  19.52ms DONE
+  0001_01_01_000002_create_jobs_table  28.26ms DONE
+  2026_03_19_135813_create_personal_access_tokens_table  30.70ms DONE
+  2026_03_19_140246_create_permission_tables  50.23ms DONE
+  2026_03_19_144041_create_project_user_table  10.27ms FAIL
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42P01]: Undefined table: 7 ERREUR:  la relation « projects » n'existe pas (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: DSM_db, SQL: alter table "project_user" add constraint "project_user_project_id_foreign" foreign key ("project_id") references "projects" ("id") on delete cascade)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕ 
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+      PDOException::("SQLSTATE[42P01]: Undefined table: 7 ERREUR:  la relation « projects » n'existe pas")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+      PDOStatement::execute()
+
