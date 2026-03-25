@@ -8,6 +8,7 @@ class Plant extends Model
 {
     protected $fillable = [
         'code',
+        'ville',
         'parcelle_id',
         'espece_id',
         'cooperative_id',
