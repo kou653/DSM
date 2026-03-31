@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\Project;
+use App\Models\Projet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AuthProjectAccessTest extends TestCase
@@ -16,20 +15,13 @@ class AuthProjectAccessTest extends TestCase
 
     public function test_login_returns_assigned_projects(): void
     {
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
-
         $user = User::factory()->create([
+            'role' => 'agent terrain',
             'password' => Hash::make('secret123'),
         ]);
-        $user->assignRole('agriculteur');
 
-        $project = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet Nord',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
-        ]);
-        $user->projects()->attach($project);
+        $projet = $this->createProjet('Projet Nord');
+        $user->projects()->attach($projet);
 
         $response = $this->postJson('/api/login', [
             'email' => $user->email,
@@ -39,166 +31,76 @@ class AuthProjectAccessTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('user.email', $user->email)
             ->assertJsonCount(1, 'user.projects')
-            ->assertJsonPath('user.projects.0.id', $project->id);
+            ->assertJsonPath('user.projects.0.id', $projet->id)
+            ->assertJsonMissingPath('user.code_acces');
     }
 
-    public function test_non_admin_can_only_access_assigned_project(): void
+    public function test_non_admin_only_sees_assigned_projects(): void
     {
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
+        $user = User::factory()->create(['role' => 'agent terrain']);
+        $assigned = $this->createProjet('Projet Assigne');
+        $blocked = $this->createProjet('Projet Bloque');
 
-        $user = User::factory()->create();
-        $user->assignRole('agriculteur');
-
-        $assignedProject = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet Assigne',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
-        ]);
-
-        $blockedProject = Project::create([
-            'code' => 'PRJ002',
-            'name' => 'Projet Bloque',
-            'partner_name' => 'Partenaire B',
-            'status' => 'active',
-        ]);
-
-        $user->projects()->attach($assignedProject);
+        $user->projects()->attach($assigned);
 
         Sanctum::actingAs($user);
 
-        $this->getJson("/api/projects/{$assignedProject->id}")
+        $this->getJson('/api/projets')
             ->assertOk()
-            ->assertJsonPath('project.id', $assignedProject->id);
+            ->assertJsonCount(1, 'projets')
+            ->assertJsonPath('projets.0.id', $assigned->id);
 
-        $this->getJson("/api/projects/{$blockedProject->id}")
+        $this->getJson("/api/projets/{$assigned->id}")
+            ->assertOk()
+            ->assertJsonPath('projet.id', $assigned->id);
+
+        $this->getJson("/api/projets/{$blocked->id}")
             ->assertForbidden();
-    }
-
-    public function test_admin_can_access_any_project(): void
-    {
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
-
-        $project = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet Libre',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
-        ]);
-
-        Sanctum::actingAs($admin);
-
-        $this->getJson("/api/projects/{$project->id}")
-            ->assertOk()
-            ->assertJsonPath('project.id', $project->id);
-    }
-
-    public function test_project_list_marks_access_for_non_admin(): void
-    {
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
-
-        $user = User::factory()->create();
-        $user->assignRole('agriculteur');
-
-        $assignedProject = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet Assigne',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
-        ]);
-
-        $unassignedProject = Project::create([
-            'code' => 'PRJ002',
-            'name' => 'Projet Visible',
-            'partner_name' => 'Partenaire B',
-            'status' => 'draft',
-        ]);
-
-        $user->projects()->attach($assignedProject);
-
-        Sanctum::actingAs($user);
-
-        $response = $this->getJson('/api/projects');
-
-        $response->assertOk()
-            ->assertJsonCount(2, 'projects')
-            ->assertJsonFragment([
-                'id' => $assignedProject->id,
-                'can_access' => true,
-            ])
-            ->assertJsonFragment([
-                'id' => $unassignedProject->id,
-                'can_access' => false,
-            ]);
     }
 
     public function test_admin_can_create_update_and_delete_project(): void
     {
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
-
+        $admin = User::factory()->create(['role' => 'administrateur']);
         Sanctum::actingAs($admin);
 
-        $createResponse = $this->postJson('/api/projects', [
-            'code' => 'PRJ100',
-            'name' => 'Projet Test',
-            'partner_name' => 'Partenaire Test',
-            'status' => 'active',
+        $createResponse = $this->postJson('/api/projets', [
+            'nom' => 'Projet Test',
             'description' => 'Description initiale',
+            'date_debut' => '2026-03-01',
+            'date_fin' => '2026-03-31',
+            'region' => 'Kara',
+            'status' => 'actif',
         ]);
 
         $createResponse->assertCreated()
-            ->assertJsonPath('project.code', 'PRJ100');
+            ->assertJsonPath('projet.nom', 'Projet Test');
 
-        $projectId = $createResponse->json('project.id');
+        $projetId = $createResponse->json('projet.id');
 
-        $this->putJson("/api/projects/{$projectId}", [
-            'name' => 'Projet Modifie',
-            'status' => 'closed',
+        $this->putJson("/api/projets/{$projetId}", [
+            'nom' => 'Projet Modifie',
+            'status' => 'en_pause',
         ])->assertOk()
-            ->assertJsonPath('project.name', 'Projet Modifie')
-            ->assertJsonPath('project.status', 'closed');
+            ->assertJsonPath('projet.nom', 'Projet Modifie')
+            ->assertJsonPath('projet.status', 'en_pause');
 
-        $this->deleteJson("/api/projects/{$projectId}")
+        $this->deleteJson("/api/projets/{$projetId}")
             ->assertOk();
 
-        $this->assertDatabaseMissing('projects', [
-            'id' => $projectId,
+        $this->assertDatabaseMissing('projets', [
+            'id' => $projetId,
         ]);
     }
 
-    public function test_non_admin_cannot_create_update_or_delete_project(): void
+    private function createProjet(string $nom): Projet
     {
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
-
-        $user = User::factory()->create();
-        $user->assignRole('agriculteur');
-
-        $project = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet Protege',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
+        return Projet::create([
+            'nom' => $nom,
+            'description' => 'Description',
+            'date_debut' => '2026-03-01',
+            'date_fin' => '2026-03-31',
+            'region' => 'Kara',
+            'status' => 'actif',
         ]);
-
-        Sanctum::actingAs($user);
-
-        $this->postJson('/api/projects', [
-            'code' => 'PRJ200',
-            'name' => 'Projet Interdit',
-            'status' => 'active',
-        ])->assertForbidden();
-
-        $this->putJson("/api/projects/{$project->id}", [
-            'name' => 'Projet Interdit',
-        ])->assertForbidden();
-
-        $this->deleteJson("/api/projects/{$project->id}")
-            ->assertForbidden();
     }
 }

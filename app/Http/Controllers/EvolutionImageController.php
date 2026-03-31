@@ -11,6 +11,8 @@ class EvolutionImageController extends Controller
 {
     public function index(Parcelle $parcelle)
     {
+        $this->authorize('view', $parcelle);
+
         return response()->json([
             'evolution' => $parcelle->evolutionImages()->orderByDesc('date')->get(),
         ]);
@@ -19,6 +21,7 @@ class EvolutionImageController extends Controller
     public function store(Request $request, Parcelle $parcelle)
     {
         $this->authorize('create', EvolutionImage::class);
+        $this->authorize('view', $parcelle);
 
         $request->validate([
             'photo' => 'required|image|max:2048',

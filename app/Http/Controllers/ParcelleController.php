@@ -8,10 +8,15 @@ use Illuminate\Http\Request;
 
 class ParcelleController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, ?Projet $projet = null)
     {
         $user = $request->user();
         $query = Parcelle::with(['cooperative', 'projet:id,nom']);
+
+        if ($projet) {
+            $this->ensureProjetAccess($user, $projet);
+            $query->where('projet_id', $projet->id);
+        }
 
         if ($user->role !== 'administrateur') {
             $query->whereHas('projet.users', function ($q) use ($user) {
@@ -31,6 +36,7 @@ class ParcelleController extends Controller
     public function store(Request $request, Projet $projet)
     {
         $this->authorize('create', Parcelle::class);
+        $this->ensureProjetAccess($request->user(), $projet);
 
         $validated = $request->validate([
             'nom' => 'required|string',
@@ -51,8 +57,10 @@ class ParcelleController extends Controller
         ], 201);
     }
 
-    public function show(Parcelle $parcelle)
+    public function show(Request $request, Parcelle $parcelle)
     {
+        $this->authorize('view', $parcelle);
+
         return response()->json([
             'parcelle' => $parcelle->load(['projet', 'cooperative', 'plants.espece']),
         ]);

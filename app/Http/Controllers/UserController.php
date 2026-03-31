@@ -27,14 +27,22 @@ class UserController extends Controller
             'password' => 'required|min:8',
             'role' => 'required|in:administrateur,agent terrain,commanditaire',
             'code_acces' => 'nullable|string',
+            'projects' => 'sometimes|array',
+            'projects.*' => 'exists:projets,id',
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
-        $user = User::create($validated);
+        $user = User::create([
+            ...collect($validated)->except('projects')->all(),
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        if (isset($validated['projects'])) {
+            $user->projects()->sync($validated['projects']);
+        }
 
         return response()->json([
-            'message' => 'Utilisateur créé avec succès.',
-            'user' => $user,
+            'message' => 'Utilisateur cree avec succes.',
+            'user' => $user->load('projects:id,nom'),
         ], 201);
     }
 
@@ -43,20 +51,35 @@ class UserController extends Controller
         abort_unless(auth()->user()->role === 'administrateur', 403);
 
         $validated = $request->validate([
-            'role' => 'required|in:administrateur,agent terrain,commanditaire',
-            'projects' => 'array',
+            'nom_complet' => 'sometimes|string',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'code_acces' => 'nullable|string',
+            'role' => 'sometimes|in:administrateur,agent terrain,commanditaire',
+            'projects' => 'sometimes|array',
             'projects.*' => 'exists:projets,id',
         ]);
 
-        $user->update(['role' => $validated['role']]);
+        $user->update(collect($validated)->except('projects')->all());
 
         if (isset($validated['projects'])) {
             $user->projects()->sync($validated['projects']);
         }
 
         return response()->json([
-            'message' => 'Utilisateur mis à jour.',
+            'message' => 'Utilisateur mis a jour.',
             'user' => $user->load('projects:id,nom'),
+        ]);
+    }
+
+    public function destroy(User $user)
+    {
+        abort_unless(auth()->user()->role === 'administrateur', 403);
+
+        $user->projects()->detach();
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Utilisateur supprime.',
         ]);
     }
 }

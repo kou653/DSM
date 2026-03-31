@@ -25,6 +25,37 @@ class EspeceController extends Controller
 
         $espece = Espece::create($validated);
 
-        return response()->json($espece, 201);
+        return response()->json([
+            'message' => 'Espece creee avec succes.',
+            'espece' => $espece,
+        ], 201);
+    }
+
+    public function update(Request $request, Espece $espece)
+    {
+        abort_unless($request->user()->role === 'administrateur', 403);
+
+        $validated = $request->validate([
+            'nom_commun' => 'sometimes|string',
+            'nom_scientifique' => 'sometimes|string',
+        ]);
+
+        $espece->update($validated);
+
+        return response()->json([
+            'message' => 'Espece mise a jour avec succes.',
+            'espece' => $espece,
+        ]);
+    }
+
+    public function destroy(Request $request, Espece $espece)
+    {
+        abort_unless($request->user()->role === 'administrateur', 403);
+
+        $espece->delete();
+
+        return response()->json([
+            'message' => 'Espece supprimee avec succes.',
+        ]);
     }
 }

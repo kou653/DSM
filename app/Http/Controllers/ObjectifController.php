@@ -10,6 +10,8 @@ class ObjectifController extends Controller
 {
     public function index(Projet $projet)
     {
+        $this->ensureProjetAccess(request()->user(), $projet);
+
         return response()->json([
             'objectifs' => $projet->objectives()->with('parcelle:id,nom')->get(),
         ]);
@@ -18,6 +20,8 @@ class ObjectifController extends Controller
     public function update(Request $request, Objectif $objectif)
     {
         abort_unless($request->user()->role === 'administrateur' || $request->user()->role === 'agent terrain', 403);
+        $objectif->loadMissing('projet');
+        $this->ensureProjetAccess($request->user(), $objectif->projet);
 
         $validated = $request->validate([
             'valeur_actuelle' => 'required|integer|min:0',

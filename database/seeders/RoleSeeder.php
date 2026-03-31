@@ -9,19 +9,8 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminRole = Role::firstOrCreate(
-            ['name' => 'admin'],
-            ['statut' => 'admin', 'description' => 'Administrateur principal']
-        );
-
-        Role::firstOrCreate(
-            ['name' => 'agriculteur'],
-            ['statut' => 'agriculteur', 'description' => 'Agriculteur de terrain']
-        );
-
-        Role::firstOrCreate(
-            ['name' => 'commanditaire'],
-            ['statut' => 'commanditaire', 'description' => 'Commanditaire ou sponsor']
-        );
+        Role::firstOrCreate(['name' => 'administrateur', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'agent terrain', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'commanditaire', 'guard_name' => 'web']);
     }
 }

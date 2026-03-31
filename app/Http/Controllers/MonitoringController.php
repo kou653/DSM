@@ -11,6 +11,8 @@ class MonitoringController extends Controller
 {
     public function projectMonitoring(Projet $projet)
     {
+        $this->ensureProjetAccess(request()->user(), $projet);
+
         $plants = Plant::whereHas('parcelle', function ($q) use ($projet) {
             $q->where('projet_id', $projet->id);
         })->get();
@@ -32,6 +34,8 @@ class MonitoringController extends Controller
 
     public function parcelleMonitoring(Parcelle $parcelle)
     {
+        $this->ensureParcelleAccess(request()->user(), $parcelle->loadMissing('projet'));
+
         $plants = $parcelle->plants;
         $total = $plants->count();
         $vivant = $plants->where('status', 'vivant')->count();

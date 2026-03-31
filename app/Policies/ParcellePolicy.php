@@ -16,7 +16,7 @@ class ParcellePolicy
             return true;
         }
 
-        return $user->projects->contains('id', $parcelle->projet_id);
+        return $user->projects()->whereKey($parcelle->projet_id)->exists();
     }
 
     /**
@@ -32,7 +32,15 @@ class ParcellePolicy
      */
     public function update(User $user, Parcelle $parcelle): bool
     {
-        return $user->role !== 'commanditaire';
+        if ($user->role === 'commanditaire') {
+            return false;
+        }
+
+        if ($user->role === 'administrateur') {
+            return true;
+        }
+
+        return $user->projects()->whereKey($parcelle->projet_id)->exists();
     }
 
     /**

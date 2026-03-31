@@ -10,6 +10,8 @@ class PlantController extends Controller
 {
     public function index(Request $request, Parcelle $parcelle)
     {
+        $this->authorize('view', $parcelle);
+
         return response()->json([
             'plants' => $parcelle->plants()->with('espece')->get(),
         ]);
@@ -28,6 +30,9 @@ class PlantController extends Controller
             'lng' => 'required|numeric',
         ]);
 
+        $parcelle = Parcelle::with('projet')->findOrFail($validated['parcelle_id']);
+        $this->authorize('view', $parcelle);
+
         $plant = Plant::create($validated);
 
         return response()->json([
@@ -39,6 +44,8 @@ class PlantController extends Controller
     public function updateStatus(Request $request, Plant $plant)
     {
         abort_unless($request->user()->role === 'administrateur' || $request->user()->role === 'agent terrain', 403);
+        $plant->loadMissing('parcelle.projet');
+        $this->ensurePlantAccess($request->user(), $plant);
 
         $validated = $request->validate([
             'status' => 'required|in:vivant,mort',

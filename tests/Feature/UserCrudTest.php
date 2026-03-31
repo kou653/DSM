@@ -2,39 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Models\Project;
+use App\Models\Projet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class UserCrudTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_create_user_with_role_and_projects(): void
+    public function test_admin_can_create_update_and_delete_user_with_projects(): void
     {
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
-        Role::create(['name' => 'commanditaire', 'guard_name' => 'web']);
-
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
-
-        $projectA = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet A',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
-        ]);
-
-        $projectB = Project::create([
-            'code' => 'PRJ002',
-            'name' => 'Projet B',
-            'partner_name' => 'Partenaire B',
-            'status' => 'active',
-        ]);
+        $admin = User::factory()->create(['role' => 'administrateur']);
+        $projetA = $this->createProjet('Projet A');
+        $projetB = $this->createProjet('Projet B');
 
         Sanctum::actingAs($admin);
 
@@ -43,100 +25,45 @@ class UserCrudTest extends TestCase
             'email' => 'agent@example.com',
             'code_acces' => 'AGT001',
             'password' => 'secret123',
-            'role' => 'agriculteur',
-            'project_ids' => [$projectA->id, $projectB->id],
+            'role' => 'agent terrain',
+            'projects' => [$projetA->id, $projetB->id],
         ]);
 
         $response->assertCreated()
             ->assertJsonPath('user.email', 'agent@example.com')
-            ->assertJsonPath('user.statut', 'agriculteur')
+            ->assertJsonPath('user.role', 'agent terrain')
             ->assertJsonCount(2, 'user.projects');
 
-        $this->assertDatabaseHas('users', [
-            'email' => 'agent@example.com',
-            'code_acces' => 'AGT001',
-        ]);
-    }
+        $userId = $response->json('user.id');
 
-    public function test_admin_can_update_user_role_and_assigned_projects(): void
-    {
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
-        Role::create(['name' => 'commanditaire', 'guard_name' => 'web']);
-
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
-
-        $user = User::factory()->create();
-        $user->assignRole('agriculteur');
-
-        $projectA = Project::create([
-            'code' => 'PRJ001',
-            'name' => 'Projet A',
-            'partner_name' => 'Partenaire A',
-            'status' => 'active',
-        ]);
-
-        $projectB = Project::create([
-            'code' => 'PRJ002',
-            'name' => 'Projet B',
-            'partner_name' => 'Partenaire B',
-            'status' => 'draft',
-        ]);
-
-        $user->projects()->attach($projectA);
-
-        Sanctum::actingAs($admin);
-
-        $response = $this->putJson("/api/users/{$user->id}", [
+        $this->putJson("/api/users/{$userId}", [
             'nom_complet' => 'Utilisateur Modifie',
             'role' => 'commanditaire',
-            'project_ids' => [$projectB->id],
-        ]);
-
-        $response->assertOk()
+            'projects' => [$projetB->id],
+        ])->assertOk()
             ->assertJsonPath('user.nom_complet', 'Utilisateur Modifie')
-            ->assertJsonPath('user.statut', 'commanditaire')
+            ->assertJsonPath('user.role', 'commanditaire')
             ->assertJsonCount(1, 'user.projects')
-            ->assertJsonPath('user.projects.0.id', $projectB->id);
-    }
+            ->assertJsonPath('user.projects.0.id', $projetB->id);
 
-    public function test_admin_can_delete_user(): void
-    {
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
-
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
-
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($admin);
-
-        $this->deleteJson("/api/users/{$user->id}")
+        $this->deleteJson("/api/users/{$userId}")
             ->assertOk();
 
-        $this->assertDatabaseMissing('users', [
-            'id' => $user->id,
-        ]);
+        $this->assertDatabaseMissing('users', ['id' => $userId]);
     }
 
     public function test_non_admin_cannot_manage_users(): void
     {
-        Role::create(['name' => 'agriculteur', 'guard_name' => 'web']);
-
-        $user = User::factory()->create();
-        $user->assignRole('agriculteur');
-
-        $managedUser = User::factory()->create();
+        $user = User::factory()->create(['role' => 'agent terrain']);
+        $managedUser = User::factory()->create(['role' => 'commanditaire']);
 
         Sanctum::actingAs($user);
 
         $this->postJson('/api/users', [
             'nom_complet' => 'Interdit',
             'email' => 'interdit@example.com',
-            'code_acces' => 'INT001',
             'password' => 'secret123',
-            'role' => 'agriculteur',
+            'role' => 'agent terrain',
         ])->assertForbidden();
 
         $this->putJson("/api/users/{$managedUser->id}", [
@@ -145,5 +72,17 @@ class UserCrudTest extends TestCase
 
         $this->deleteJson("/api/users/{$managedUser->id}")
             ->assertForbidden();
+    }
+
+    private function createProjet(string $nom): Projet
+    {
+        return Projet::create([
+            'nom' => $nom,
+            'description' => 'Description',
+            'date_debut' => '2026-03-01',
+            'date_fin' => '2026-03-31',
+            'region' => 'Kara',
+            'status' => 'actif',
+        ]);
     }
 }
