@@ -7,17 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Espece extends Model
 {
     protected $fillable = [
-        'common_name',
-        'scientific_name',
+        'nom_commun',
+        'nom_scientifique',
     ];
 
     public function plants()
     {
         return $this->hasMany(Plant::class);
-    }
-
-    public function monitorings()
-    {
-        return $this->hasMany(Monitoring::class);
     }
 }

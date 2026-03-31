@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
@@ -25,18 +23,5 @@ class RoleSeeder extends Seeder
             ['name' => 'commanditaire'],
             ['statut' => 'commanditaire', 'description' => 'Commanditaire ou sponsor']
         );
-
-        $adminUser = User::firstOrCreate(
-            ['email' => 'admin@plateforme.com'],
-            [
-                'nom_complet' => 'Super Admin',
-                'code_acces' => 'ADMIN001',
-                'password' => Hash::make('password'),
-            ]
-        );
-
-        if (!$adminUser->hasRole('admin')) {
-            $adminUser->assignRole($adminRole);
-        }
     }
 }

@@ -1,5 +1,8 @@
 
    INFO  Seeding database.  
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
 
 
    Illuminate\Database\QueryException 
@@ -27,3 +30,90 @@ LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
   2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
       PDOStatement::execute()
 
+=======
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42703]: Undefined column: 7 ERREUR:  la colonne « password » de la relation « users » n'existe pas
+LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
+                                                             ^ (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: DSM_db, SQL: insert into "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password", "updated_at", "created_at") values (admin@plateforme.com, Super Admin, ADMIN001, $2y$12$IMy6QIXz2R6wy9zb/8fBjeRBibMDN52Z6tQ8cNCraSMQ1ZOx4LaIG, 2026-03-21 22:40:55, 2026-03-21 22:40:55) returning "id")
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕ 
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
+      PDOException::("SQLSTATE[42703]: Undefined column: 7 ERREUR:  la colonne « password » de la relation « users » n'existe pas
+LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
+                                                             ^")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
+      PDOStatement::execute()
+
+>>>>>>> theirs
+=======
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42703]: Undefined column: 7 ERREUR:  la colonne « password » de la relation « users » n'existe pas
+LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
+                                                             ^ (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: DSM_db, SQL: insert into "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password", "updated_at", "created_at") values (admin@plateforme.com, Super Admin, ADMIN001, $2y$12$IMy6QIXz2R6wy9zb/8fBjeRBibMDN52Z6tQ8cNCraSMQ1ZOx4LaIG, 2026-03-21 22:40:55, 2026-03-21 22:40:55) returning "id")
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕ 
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
+      PDOException::("SQLSTATE[42703]: Undefined column: 7 ERREUR:  la colonne « password » de la relation « users » n'existe pas
+LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
+                                                             ^")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
+      PDOStatement::execute()
+
+>>>>>>> theirs
+=======
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42703]: Undefined column: 7 ERREUR:  la colonne « password » de la relation « users » n'existe pas
+LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
+                                                             ^ (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: DSM_db, SQL: insert into "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password", "updated_at", "created_at") values (admin@plateforme.com, Super Admin, ADMIN001, $2y$12$IMy6QIXz2R6wy9zb/8fBjeRBibMDN52Z6tQ8cNCraSMQ1ZOx4LaIG, 2026-03-21 22:40:55, 2026-03-21 22:40:55) returning "id")
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834▕             $exceptionType = $this->isUniqueConstraintError($e)
+    835▕                 ? UniqueConstraintViolationException::class
+    836▕                 : QueryException::class;
+    837▕ 
+  ➜ 838▕             throw new $exceptionType(
+    839▕                 $this->getNameWithReadWriteType(),
+    840▕                 $query,
+    841▕                 $this->prepareBindings($bindings),
+    842▕                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
+      PDOException::("SQLSTATE[42703]: Undefined column: 7 ERREUR:  la colonne « password » de la relation « users » n'existe pas
+LINE 1: ...to "users" ("EMAIL", "NOM COMPLET", "CODE_ACCES", "password"...
+                                                             ^")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:425
+      PDOStatement::execute()
+
+>>>>>>> theirs

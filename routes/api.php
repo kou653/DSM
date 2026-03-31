@@ -6,59 +6,56 @@ use App\Http\Controllers\EspeceController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\ParcelleController;
 use App\Http\Controllers\PlantController;
-use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjetController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EvolutionImageController;
+use App\Http\Controllers\ObjectifController;
 use Illuminate\Support\Facades\Route;
 
+// Authentification
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/user', [AuthController::class, 'me']);
 
-    Route::get('/projects', [ProjectController::class, 'index']);
-    Route::post('/projects', [ProjectController::class, 'store']);
-    Route::get('/projects/{project}', [ProjectController::class, 'show']);
-    Route::get('/projects/{project}/dashboard', [ProjectController::class, 'dashboard']);
-    Route::put('/projects/{project}', [ProjectController::class, 'update']);
-    Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
+    // Projets
+    Route::get('/projets', [ProjetController::class, 'index']);
+    Route::post('/projets', [ProjetController::class, 'store']);
+    Route::get('/projets/{projet}', [ProjetController::class, 'show']);
+    Route::put('/projets/{projet}', [ProjetController::class, 'update']);
+    Route::delete('/projets/{projet}', [ProjetController::class, 'destroy']);
 
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
-    Route::get('/users/{user}', [UserController::class, 'show']);
-    Route::put('/users/{user}', [UserController::class, 'update']);
-    Route::delete('/users/{user}', [UserController::class, 'destroy']);
-
+    // Parcelles
+    Route::get('/projets/{projet}/parcelles', [ParcelleController::class, 'index']); // Filtered by project via logic in Controller
     Route::get('/parcelles', [ParcelleController::class, 'index']);
-    Route::post('/parcelles', [ParcelleController::class, 'store']);
     Route::get('/parcelles/{parcelle}', [ParcelleController::class, 'show']);
+    Route::post('/projets/{projet}/parcelles', [ParcelleController::class, 'store']);
     Route::put('/parcelles/{parcelle}', [ParcelleController::class, 'update']);
     Route::delete('/parcelles/{parcelle}', [ParcelleController::class, 'destroy']);
 
-    Route::get('/especes', [EspeceController::class, 'index']);
-    Route::post('/especes', [EspeceController::class, 'store']);
-    Route::get('/especes/{espece}', [EspeceController::class, 'show']);
-    Route::put('/especes/{espece}', [EspeceController::class, 'update']);
-    Route::delete('/especes/{espece}', [EspeceController::class, 'destroy']);
-
-    Route::get('/plants', [PlantController::class, 'index']);
+    // Plants & Monitoring
+    Route::get('/projets/{projet}/monitoring', [MonitoringController::class, 'projectMonitoring']);
+    Route::get('/parcelles/{parcelle}/monitoring', [MonitoringController::class, 'parcelleMonitoring']);
+    Route::get('/parcelles/{parcelle}/plants', [PlantController::class, 'index']);
     Route::post('/plants', [PlantController::class, 'store']);
-    Route::get('/plants/{plant}', [PlantController::class, 'show']);
-    Route::put('/plants/{plant}', [PlantController::class, 'update']);
-    Route::delete('/plants/{plant}', [PlantController::class, 'destroy']);
+    Route::patch('/plants/{plant}/status', [PlantController::class, 'updateStatus']);
 
+    // Objectifs
+    Route::get('/projets/{projet}/objectifs', [ObjectifController::class, 'index']);
+    Route::put('/objectifs/{objectif}', [ObjectifController::class, 'update']);
+
+    // Evolution Visuelle
+    Route::get('/parcelles/{parcelle}/evolution', [EvolutionImageController::class, 'index']);
+    Route::post('/parcelles/{parcelle}/evolution', [EvolutionImageController::class, 'store']);
+    Route::delete('/evolution/{image}', [EvolutionImageController::class, 'destroy']);
+
+    // Référentiels
+    Route::get('/especes', [EspeceController::class, 'index']);
     Route::get('/cooperatives', [CooperativeController::class, 'index']);
-    Route::post('/cooperatives', [CooperativeController::class, 'store']);
-    Route::get('/cooperatives/{cooperative}', [CooperativeController::class, 'show']);
-    Route::put('/cooperatives/{cooperative}', [CooperativeController::class, 'update']);
-    Route::delete('/cooperatives/{cooperative}', [CooperativeController::class, 'destroy']);
 
-    Route::get('/monitorings', [MonitoringController::class, 'index']);
-    Route::post('/monitorings', [MonitoringController::class, 'store']);
-    Route::get('/monitorings/{monitoring}', [MonitoringController::class, 'show']);
-    Route::put('/monitorings/{monitoring}', [MonitoringController::class, 'update']);
-    Route::delete('/monitorings/{monitoring}', [MonitoringController::class, 'destroy']);
-
-    Route::get('/projects/{project}/monitoring-summary', [MonitoringController::class, 'projectSummary']);
-    Route::get('/projects/{project}/monitoring-map', [MonitoringController::class, 'mapSummary']);
+    // Administration
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
 });

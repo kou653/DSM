@@ -7,23 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Parcelle extends Model
 {
     protected $fillable = [
-        'code',
-        'project_id',
+        'nom',
+        'ville',
         'cooperative_id',
-        'name',
-        'city',
-        'surface_area',
-        'surface_unit',
-        'responsible_name',
-        'contact_phone',
-        'gps_lat',
-        'gps_long',
-        'notes',
+        'projet_id',
+        'superficie',
+        'lat',
+        'lng',
+        'objectif',
     ];
 
-    public function project()
+    public function projet()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Projet::class);
     }
 
     public function cooperative()
@@ -36,8 +32,8 @@ class Parcelle extends Model
         return $this->hasMany(Plant::class);
     }
 
-    public function monitorings()
+    public function evolutionImages()
     {
-        return $this->hasMany(Monitoring::class);
+        return $this->hasMany(EvolutionImage::class);
     }
 }

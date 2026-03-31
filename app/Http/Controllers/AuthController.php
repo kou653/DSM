@@ -60,13 +60,11 @@ class AuthController extends Controller
             'nom_complet' => $user->nom_complet,
             'email' => $user->email,
             'code_acces' => $user->code_acces,
-            'roles' => $user->getRoleNames(),
+            'role' => $user->role, // Using the new role column
             'projects' => $user->projects->map(function ($project) {
                 return [
                     'id' => $project->id,
-                    'code' => $project->code,
-                    'name' => $project->name,
-                    'partner_name' => $project->partner_name,
+                    'nom' => $project->nom,
                     'status' => $project->status,
                 ];
             })->values(),
