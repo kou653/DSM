@@ -10,7 +10,7 @@ class ProjetController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Projet::query();
+        $query = Projet::query()->withCount('parcelles');
 
         // Filtering by role
         if ($user->role !== 'administrateur') {
