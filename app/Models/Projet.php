@@ -12,6 +12,7 @@ class Projet extends Model
         'date_debut',
         'date_fin',
         'region',
+        'objectif',
         'status',
     ];
 
@@ -22,7 +23,7 @@ class Projet extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'projet_user');
+        return $this->belongsToMany(User::class , 'projet_user');
     }
 
     public function objectives()

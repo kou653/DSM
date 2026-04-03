@@ -34,6 +34,7 @@ class ProjetController extends Controller
             'date_debut' => 'required|date',
             'date_fin' => 'required|date',
             'region' => 'required|string',
+            'objectif' => 'nullable|integer|min:1',
             'status' => 'required|in:actif,termine,en_pause',
         ]);
 
@@ -64,6 +65,7 @@ class ProjetController extends Controller
             'date_debut' => 'sometimes|date',
             'date_fin' => 'sometimes|date',
             'region' => 'sometimes|string',
+            'objectif' => 'sometimes|nullable|integer|min:1',
             'status' => 'sometimes|in:actif,termine,en_pause',
         ]);
 
@@ -89,7 +91,8 @@ class ProjetController extends Controller
     private function ensureAccess(Request $request, Projet $projet)
     {
         $user = $request->user();
-        if ($user->role === 'administrateur') return;
+        if ($user->role === 'administrateur')
+            return;
 
         abort_unless($user->projects->contains('id', $projet->id), 403, "Vous n'avez pas accès à ce projet.");
     }

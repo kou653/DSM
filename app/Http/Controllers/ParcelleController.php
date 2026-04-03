@@ -45,10 +45,32 @@ class ParcelleController extends Controller
             'superficie' => 'required|numeric',
             'lat' => 'required|numeric',
             'lng' => 'required|numeric',
-            'objectif' => 'nullable|string',
+            'objectif' => 'nullable|integer|min:1',
         ]);
 
         $validated['projet_id'] = $projet->id;
+
+        $objectifParcelle = $validated['objectif'] ?? null;
+
+        if (
+        array_key_exists('objectif', $validated) &&
+        !is_null($validated['objectif']) &&
+        is_null($projet->objectif)
+        ) {
+            return response()->json([
+                'message' => "Impossible de definir un objectif de parcelle sans objectif global sur le projet.",
+            ], 422);
+        }
+
+        if (!is_null($objectifParcelle) && !is_null($projet->objectif)) {
+            $sommeExistante = $projet->parcelles()->sum('objectif');
+
+            if (($sommeExistante + $objectifParcelle) > $projet->objectif) {
+                return response()->json([
+                    'message' => "La somme des objectifs des parcelles depasse l'objectif global du projet.",
+                ], 422);
+            }
+        }
         $parcelle = Parcelle::create($validated);
 
         return response()->json([
@@ -77,10 +99,33 @@ class ParcelleController extends Controller
             'superficie' => 'sometimes|numeric',
             'lat' => 'sometimes|numeric',
             'lng' => 'sometimes|numeric',
-            'objectif' => 'nullable|string',
+            'objectif' => 'nullable|integer|min:1',
         ]);
 
         $parcelle->update($validated);
+
+        $objectifParcelle = $validated['objectif'] ?? $parcelle->objectif;
+
+        $projet = $parcelle->projet;
+
+        if (!is_null($objectifParcelle) && is_null($projet->objectif)) {
+            return response()->json([
+                'message' => "Impossible de definir un objectif de parcelle sans objectif global sur le projet.",
+            ], 422);
+        }
+
+        $sommeAutres = $projet->parcelles()
+            ->where('id', '!=', $parcelle->id)
+            ->sum('objectif');
+
+        if (!is_null($objectifParcelle) && !is_null($projet->objectif)) {
+            if (($sommeAutres + $objectifParcelle) > $projet->objectif) {
+                return response()->json([
+                    'message' => "La somme des objectifs des parcelles depasse l'objectif global du projet.",
+                ], 422);
+            }
+        }
+
 
         return response()->json([
             'message' => 'Parcelle modifiée avec succès.',
