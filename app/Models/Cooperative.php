@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Cooperative extends Model
 {
     protected $fillable = [
+        'projet_id',
         'nom',
         'entreprise',
         'contact',
@@ -18,5 +19,10 @@ class Cooperative extends Model
     public function parcelles()
     {
         return $this->hasMany(Parcelle::class);
+    }
+
+    public function projet()
+    {
+        return $this->belongsTo(Projet::class);
     }
 }

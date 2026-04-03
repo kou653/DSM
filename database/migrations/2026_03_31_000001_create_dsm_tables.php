@@ -25,12 +25,13 @@ return new class extends Migration
 
         Schema::create('cooperatives', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('projet_id')->constrained();
             $table->string('nom');
             $table->string('entreprise');
             $table->string('contact');
             $table->string('email')->unique();
             $table->string('ville');
-            $table->string('village');
+            $table->string('village')->nullable();
             $table->timestamps();
         });
 

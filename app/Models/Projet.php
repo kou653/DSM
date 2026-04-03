@@ -21,6 +21,11 @@ class Projet extends Model
         return $this->hasMany(Parcelle::class);
     }
 
+    public function cooperatives()
+    {
+        return $this->hasMany(Cooperative::class);
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class , 'projet_user');

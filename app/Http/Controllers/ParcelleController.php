@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cooperative;
 use App\Models\Parcelle;
 use App\Models\Projet;
 use Illuminate\Http\Request;
@@ -48,15 +49,18 @@ class ParcelleController extends Controller
             'objectif' => 'nullable|integer|min:1',
         ]);
 
-        $validated['projet_id'] = $projet->id;
+        $cooperative = Cooperative::findOrFail($validated['cooperative_id']);
 
+        if ($cooperative->projet_id !== $projet->id) {
+            return response()->json([
+                'message' => "La cooperative selectionnee n'appartient pas au projet actif.",
+            ], 422);
+        }
+
+        $validated['projet_id'] = $projet->id;
         $objectifParcelle = $validated['objectif'] ?? null;
 
-        if (
-        array_key_exists('objectif', $validated) &&
-        !is_null($validated['objectif']) &&
-        is_null($projet->objectif)
-        ) {
+        if (!is_null($objectifParcelle) && is_null($projet->objectif)) {
             return response()->json([
                 'message' => "Impossible de definir un objectif de parcelle sans objectif global sur le projet.",
             ], 422);
@@ -71,10 +75,11 @@ class ParcelleController extends Controller
                 ], 422);
             }
         }
+
         $parcelle = Parcelle::create($validated);
 
         return response()->json([
-            'message' => 'Parcelle ajoutée avec succès.',
+            'message' => 'Parcelle ajoutee avec succes.',
             'parcelle' => $parcelle,
         ], 201);
     }
@@ -99,14 +104,23 @@ class ParcelleController extends Controller
             'superficie' => 'sometimes|numeric',
             'lat' => 'sometimes|numeric',
             'lng' => 'sometimes|numeric',
-            'objectif' => 'nullable|integer|min:1',
+            'objectif' => 'sometimes|nullable|integer|min:1',
         ]);
 
-        $parcelle->update($validated);
+        if (array_key_exists('cooperative_id', $validated)) {
+            $cooperative = Cooperative::findOrFail($validated['cooperative_id']);
 
-        $objectifParcelle = $validated['objectif'] ?? $parcelle->objectif;
+            if ($cooperative->projet_id !== $parcelle->projet_id) {
+                return response()->json([
+                    'message' => "La cooperative selectionnee n'appartient pas au projet de la parcelle.",
+                ], 422);
+            }
+        }
 
         $projet = $parcelle->projet;
+        $objectifParcelle = array_key_exists('objectif', $validated)
+            ? $validated['objectif']
+            : $parcelle->objectif;
 
         if (!is_null($objectifParcelle) && is_null($projet->objectif)) {
             return response()->json([
@@ -126,9 +140,10 @@ class ParcelleController extends Controller
             }
         }
 
+        $parcelle->update($validated);
 
         return response()->json([
-            'message' => 'Parcelle modifiée avec succès.',
+            'message' => 'Parcelle modifiee avec succes.',
             'parcelle' => $parcelle,
         ]);
     }
@@ -140,7 +155,7 @@ class ParcelleController extends Controller
         $parcelle->delete();
 
         return response()->json([
-            'message' => 'Parcelle supprimée avec succès.',
+            'message' => 'Parcelle supprimee avec succes.',
         ]);
     }
 }

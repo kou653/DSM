@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/projets/{projet}/parcelles', [ParcelleController::class, 'index']);
     Route::post('/projets/{projet}/parcelles', [ParcelleController::class, 'store']);
+    Route::get('/projets/{projet}/cooperatives', [CooperativeController::class, 'index']);
+    Route::post('/projets/{projet}/cooperatives', [CooperativeController::class, 'store']);
     Route::get('/parcelles', [ParcelleController::class, 'index']);
     Route::get('/parcelles/{parcelle}', [ParcelleController::class, 'show']);
     Route::put('/parcelles/{parcelle}', [ParcelleController::class, 'update']);

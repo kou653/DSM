@@ -45,9 +45,11 @@ class DomainCrudTest extends TestCase
     public function test_admin_can_crud_cooperatives(): void
     {
         $admin = User::factory()->create(['role' => 'administrateur']);
+        $projet = $this->createProjet('Projet Coop Centrale');
         Sanctum::actingAs($admin);
 
         $createResponse = $this->postJson('/api/cooperatives', [
+            'projet_id' => $projet->id,
             'nom' => 'Coop Centrale',
             'entreprise' => 'Entreprise Coop',
             'contact' => 'Mme Doe',
@@ -57,7 +59,8 @@ class DomainCrudTest extends TestCase
         ]);
 
         $createResponse->assertCreated()
-            ->assertJsonPath('cooperative.nom', 'Coop Centrale');
+            ->assertJsonPath('cooperative.nom', 'Coop Centrale')
+            ->assertJsonPath('cooperative.projet_id', $projet->id);
 
         $cooperativeId = $createResponse->json('cooperative.id');
 
@@ -75,11 +78,13 @@ class DomainCrudTest extends TestCase
     public function test_non_admin_can_list_but_not_mutate_referentials(): void
     {
         $user = User::factory()->create(['role' => 'agent terrain']);
+        $projet = $this->createProjet('Projet Lecture');
         Espece::create([
             'nom_commun' => 'Neem',
             'nom_scientifique' => 'Azadirachta indica',
         ]);
         Cooperative::create([
+            'projet_id' => $projet->id,
             'nom' => 'Coop Lecture',
             'entreprise' => 'Entreprise',
             'contact' => 'John Doe',
@@ -88,6 +93,7 @@ class DomainCrudTest extends TestCase
             'village' => 'Village',
         ]);
 
+        $user->projects()->attach($projet);
         Sanctum::actingAs($user);
 
         $this->getJson('/api/especes')
@@ -104,6 +110,7 @@ class DomainCrudTest extends TestCase
         ])->assertForbidden();
 
         $this->postJson('/api/cooperatives', [
+            'projet_id' => $projet->id,
             'nom' => 'Interdite',
             'entreprise' => 'Entreprise',
             'contact' => 'Jane Doe',
@@ -118,13 +125,14 @@ class DomainCrudTest extends TestCase
         $user = User::factory()->create(['role' => 'agent terrain']);
         $assignedProjet = $this->createProjet('Projet Assigne');
         $blockedProjet = $this->createProjet('Projet Bloque');
-        $cooperative = $this->createCooperative();
+        $assignedCooperative = $this->createCooperative($assignedProjet, 'assigned-coop@example.com');
+        $blockedCooperative = $this->createCooperative($blockedProjet, 'blocked-coop@example.com');
         $espece = $this->createEspece();
 
         $assignedParcelle = Parcelle::create([
             'nom' => 'Parcelle Visible',
             'ville' => 'Kara',
-            'cooperative_id' => $cooperative->id,
+            'cooperative_id' => $assignedCooperative->id,
             'projet_id' => $assignedProjet->id,
             'superficie' => 12.5,
             'lat' => 9.5511,
@@ -134,7 +142,7 @@ class DomainCrudTest extends TestCase
         $blockedParcelle = Parcelle::create([
             'nom' => 'Parcelle Bloquee',
             'ville' => 'Lome',
-            'cooperative_id' => $cooperative->id,
+            'cooperative_id' => $blockedCooperative->id,
             'projet_id' => $blockedProjet->id,
             'superficie' => 8.5,
             'lat' => 6.1319,
@@ -211,13 +219,14 @@ class DomainCrudTest extends TestCase
         ]);
     }
 
-    private function createCooperative(): Cooperative
+    private function createCooperative(Projet $projet, string $email = 'coop-test@example.com'): Cooperative
     {
         return Cooperative::create([
+            'projet_id' => $projet->id,
             'nom' => 'Coop Test',
             'entreprise' => 'Entreprise',
             'contact' => 'Responsable',
-            'email' => 'coop-test@example.com',
+            'email' => $email,
             'ville' => 'Kara',
             'village' => 'Village',
         ]);
