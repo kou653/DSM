@@ -15,11 +15,18 @@ class Parcelle extends Model
         'lat',
         'lng',
         'objectif',
+        'objectif_atteint',
+        'espece_id',
     ];
 
     public function projet()
     {
         return $this->belongsTo(Projet::class);
+    }
+
+    public function espece()
+    {
+        return $this->belongsTo(Espece::class);
     }
 
     public function cooperative()

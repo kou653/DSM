@@ -12,7 +12,7 @@ class ParcelleController extends Controller
     public function index(Request $request, ?Projet $projet = null)
     {
         $user = $request->user();
-        $query = Parcelle::with(['cooperative', 'projet:id,nom']);
+        $query = Parcelle::with(['cooperative', 'projet:id,nom', 'espece']);
 
         if ($projet) {
             $this->ensureProjetAccess($user, $projet);
@@ -47,6 +47,8 @@ class ParcelleController extends Controller
             'lat' => 'required|numeric',
             'lng' => 'required|numeric',
             'objectif' => 'nullable|integer|min:1',
+            'objectif_atteint' => 'nullable|integer|min:0',
+            'espece_id' => 'required|exists:especes,id',
         ]);
 
         $cooperative = Cooperative::findOrFail($validated['cooperative_id']);
@@ -89,7 +91,7 @@ class ParcelleController extends Controller
         $this->authorize('view', $parcelle);
 
         return response()->json([
-            'parcelle' => $parcelle->load(['projet', 'cooperative', 'plants.espece']),
+            'parcelle' => $parcelle->load(['projet', 'cooperative', 'espece', 'plants.espece']),
         ]);
     }
 
@@ -105,6 +107,8 @@ class ParcelleController extends Controller
             'lat' => 'sometimes|numeric',
             'lng' => 'sometimes|numeric',
             'objectif' => 'sometimes|nullable|integer|min:1',
+            'objectif_atteint' => 'sometimes|nullable|integer|min:0',
+            'espece_id' => 'sometimes|exists:especes,id',
         ]);
 
         if (array_key_exists('cooperative_id', $validated)) {
