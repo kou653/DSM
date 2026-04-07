@@ -26,6 +26,7 @@ class EvolutionImageController extends Controller
         $request->validate([
             'photo' => 'required|image|max:2048',
             'description' => 'required|string',
+            'date_observation' => 'required|date',
         ]);
 
         $path = $request->file('photo')->store('evolutions', 'public');
@@ -37,7 +38,7 @@ class EvolutionImageController extends Controller
             'user_id' => $request->user()->id,
             'url' => $url,
             'description' => $request->description,
-            'date' => now(),
+            'date' => $request->date_observation,
         ]);
 
         return response()->json([
