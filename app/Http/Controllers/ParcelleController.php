@@ -48,7 +48,7 @@ class ParcelleController extends Controller
             'lng' => 'required|numeric',
             'objectif' => 'nullable|integer|min:1',
             'objectif_atteint' => 'nullable|integer|min:0',
-            'espece_id' => 'required|exists:especes,id',
+            'espece_id' => 'nullable|exists:especes,id',
         ]);
 
         $cooperative = Cooperative::findOrFail($validated['cooperative_id']);
@@ -108,7 +108,7 @@ class ParcelleController extends Controller
             'lng' => 'sometimes|numeric',
             'objectif' => 'sometimes|nullable|integer|min:1',
             'objectif_atteint' => 'sometimes|nullable|integer|min:0',
-            'espece_id' => 'sometimes|exists:especes,id',
+            'espece_id' => 'nullable|exists:especes,id',
         ]);
 
         if (array_key_exists('cooperative_id', $validated)) {
