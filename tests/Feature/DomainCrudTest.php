@@ -207,6 +207,60 @@ class DomainCrudTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_creating_a_plant_increments_objectif_atteint_and_manual_update_is_ignored(): void
+    {
+        $user = User::factory()->create(['role' => 'agent terrain']);
+        $projet = Projet::create([
+            'nom' => 'Projet Objectif',
+            'description' => 'Description',
+            'date_debut' => '2026-03-01',
+            'date_fin' => '2026-03-31',
+            'region' => 'Kara',
+            'objectif' => 50,
+            'status' => 'actif',
+        ]);
+        $cooperative = $this->createCooperative($projet, 'objectif-coop@example.com');
+        $espece = $this->createEspece();
+
+        $parcelle = Parcelle::create([
+            'nom' => 'Parcelle Objectif',
+            'ville' => 'Kara',
+            'cooperative_id' => $cooperative->id,
+            'projet_id' => $projet->id,
+            'superficie' => 10.0,
+            'lat' => 9.5511,
+            'lng' => 1.1864,
+            'objectif' => 20,
+            'objectif_atteint' => 0,
+        ]);
+
+        $user->projects()->attach($projet);
+        Sanctum::actingAs($user);
+
+        $this->putJson("/api/parcelles/{$parcelle->id}", [
+            'objectif_atteint' => 12,
+        ])->assertOk();
+
+        $this->assertDatabaseHas('parcelles', [
+            'id' => $parcelle->id,
+            'objectif_atteint' => 0,
+        ]);
+
+        $this->postJson('/api/plants', [
+            'espece_id' => $espece->id,
+            'parcelle_id' => $parcelle->id,
+            'date_plantation' => '2026-03-20',
+            'status' => 'vivant',
+            'lat' => 9.5511,
+            'lng' => 1.1864,
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('parcelles', [
+            'id' => $parcelle->id,
+            'objectif_atteint' => 1,
+        ]);
+    }
+
     private function createProjet(string $nom): Projet
     {
         return Projet::create([

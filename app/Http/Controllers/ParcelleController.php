@@ -47,7 +47,6 @@ class ParcelleController extends Controller
             'lat' => 'required|numeric',
             'lng' => 'required|numeric',
             'objectif' => 'nullable|integer|min:1',
-            'objectif_atteint' => 'nullable|integer|min:0',
             'espece_id' => 'nullable|exists:especes,id',
         ]);
 
@@ -107,7 +106,6 @@ class ParcelleController extends Controller
             'lat' => 'sometimes|numeric',
             'lng' => 'sometimes|numeric',
             'objectif' => 'sometimes|nullable|integer|min:1',
-            'objectif_atteint' => 'sometimes|nullable|integer|min:0',
             'espece_id' => 'nullable|exists:especes,id',
         ]);
 

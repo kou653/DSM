@@ -34,6 +34,7 @@ class PlantController extends Controller
         $this->authorize('view', $parcelle);
 
         $plant = Plant::create($validated);
+        $parcelle->increment('objectif_atteint');
 
         return response()->json([
             'message' => 'Plant enregistré avec succès.',
