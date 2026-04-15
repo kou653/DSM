@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/parcelles/{parcelle}/plants', [PlantController::class, 'index']);
     Route::post('/plants', [PlantController::class, 'store']);
     Route::patch('/plants/{plant}/status', [PlantController::class, 'updateStatus']);
+    Route::patch('/plants/{plant}/documentation', [PlantController::class, 'updateDocumentation']);
 
     Route::get('/projets/{projet}/objectifs', [ObjectifController::class, 'index']);
     Route::put('/objectifs/{objectif}', [ObjectifController::class, 'update']);

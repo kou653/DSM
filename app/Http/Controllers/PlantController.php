@@ -59,4 +59,24 @@ class PlantController extends Controller
             'plant' => $plant,
         ]);
     }
+
+    public function updateDocumentation(Request $request, Plant $plant)
+    {
+        abort_unless($request->user()->role === 'administrateur' || $request->user()->role === 'agent terrain', 403);
+        $plant->loadMissing('parcelle.projet');
+        $this->ensurePlantAccess($request->user(), $plant);
+
+        $validated = $request->validate([
+            'documentation' => 'nullable|string|max:5000',
+        ]);
+
+        $plant->update([
+            'documentation' => $validated['documentation'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Documentation du plant mise a jour.',
+            'plant' => $plant,
+        ]);
+    }
 }

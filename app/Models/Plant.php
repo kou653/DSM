@@ -13,6 +13,7 @@ class Plant extends Model
         'status',
         'lat',
         'lng',
+        'documentation',
     ];
 
     public function espece()
