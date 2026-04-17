@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/especes', [EspeceController::class, 'index']);
     Route::post('/especes', [EspeceController::class, 'store']);
+    Route::post('/especes/bulk', [EspeceController::class, 'bulkStore']);
     Route::put('/especes/{espece}', [EspeceController::class, 'update']);
     Route::delete('/especes/{espece}', [EspeceController::class, 'destroy']);
 
