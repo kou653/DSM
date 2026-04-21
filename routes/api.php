@@ -10,6 +10,7 @@ use App\Http\Controllers\ParcelleController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProjetController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -62,4 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+    Route::post('/ai/analyze', [AiController::class, 'analyze']);
 });
