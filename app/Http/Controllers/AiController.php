@@ -27,7 +27,7 @@ class AiController extends Controller
         $prompt .= "Données :\n" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\n";
         $prompt .= "Réponds en français, avec bienveillance, de manière structurée en utilisant le Markdown (titres, listes à puces) et sois concis mais utile.";
 
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey;
 
         $response = Http::post($url, [
             'contents' => [
@@ -45,10 +45,17 @@ class AiController extends Controller
             return response()->json(['result' => $text]);
         }
 
+        $errorData = $response->json();
+        $errorMessage = $errorData['error']['message'] ?? 'Erreur inconnue de l\'API Gemini.';
+        $status = $response->status();
+
+        // Si Gemini renvoie 405, on le transforme en 502 pour éviter la confusion avec les routes Laravel
+        $finalStatus = ($status === 405) ? 502 : (($status >= 400 && $status < 600) ? $status : 500);
+
         return response()->json([
-            'message' => 'Erreur lors de la communication avec l\'API Gemini.',
-            'error' => $response->json(),
-            'status' => $response->status(),
-        ], 500);
+            'message' => 'Erreur lors de la communication avec l\'API Gemini : ' . $errorMessage,
+            'details' => $errorData,
+            'status' => $status,
+        ], $finalStatus);
     }
 }
