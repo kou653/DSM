@@ -25,13 +25,14 @@ class AiController extends Controller
         $prompt = "Tu es un assistant IA expert en agronomie et gestion de projets de reforestation (Dronek). Ton rôle est d'analyser les données structurées suivantes et de fournir un résumé clair, des insights et des recommandations si possible.\n\n";
         $prompt .= "Contexte de la page : " . $contextName . "\n";
         $prompt .= "Données :\n" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\n";
+        $prompt .= "Ne pose jamais de question a la fin.";
         $models = ['gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemini-2.5-flash'];
         $response = null;
         $lastError = null;
 
         foreach ($models as $modelName) {
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$modelName}:generateContent?key=" . $apiKey;
-            
+
             for ($attempt = 1; $attempt <= 2; $attempt++) {
                 try {
                     $response = Http::post($url, [
@@ -48,7 +49,7 @@ class AiController extends Controller
 
                     // On ne réessaie que si c'est une surcharge (503)
                     if ($response->status() !== 503) {
-                        break; 
+                        break;
                     }
                 } catch (\Exception $e) {
                     // Erreur de connexion, on laisse le retry faire son travail
