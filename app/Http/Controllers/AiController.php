@@ -25,31 +25,53 @@ class AiController extends Controller
         $prompt = "Tu es un assistant IA expert en agronomie et gestion de projets de reforestation (Dronek). Ton rôle est d'analyser les données structurées suivantes et de fournir un résumé clair, des insights et des recommandations si possible.\n\n";
         $prompt .= "Contexte de la page : " . $contextName . "\n";
         $prompt .= "Données :\n" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\n";
-        $prompt .= "Réponds en français, avec bienveillance, de manière structurée en utilisant le Markdown (titres, listes à puces) et sois concis mais utile.";
+        $models = ['gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview', 'gemini-2.5-flash'];
+        $response = null;
+        $lastError = null;
 
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey;
+        foreach ($models as $modelName) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$modelName}:generateContent?key=" . $apiKey;
+            
+            for ($attempt = 1; $attempt <= 2; $attempt++) {
+                try {
+                    $response = Http::post($url, [
+                        'contents' => [
+                            [
+                                'parts' => [['text' => $prompt]]
+                            ]
+                        ]
+                    ]);
 
-        $response = Http::post($url, [
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => $prompt]
-                    ]
-                ]
-            ]
-        ]);
+                    if ($response->successful()) {
+                        break 2; // Succès ! On sort des deux boucles.
+                    }
 
-        if ($response->successful()) {
+                    // On ne réessaie que si c'est une surcharge (503)
+                    if ($response->status() !== 503) {
+                        break; 
+                    }
+                } catch (\Exception $e) {
+                    // Erreur de connexion, on laisse le retry faire son travail
+                }
+
+                if ($attempt < 2) {
+                    sleep(1); // Petite pause avant de réessayer
+                }
+            }
+
+            $lastError = $response ? $response->json() : null;
+        }
+
+        if ($response && $response->successful()) {
             $responseData = $response->json();
             $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? 'Aucune réponse générée.';
             return response()->json(['result' => $text]);
         }
 
-        $errorData = $response->json();
+        $errorData = $lastError ?? $response?->json() ?? [];
         $errorMessage = $errorData['error']['message'] ?? 'Erreur inconnue de l\'API Gemini.';
-        $status = $response->status();
+        $status = $response?->status() ?? 500;
 
-        // Si Gemini renvoie 405, on le transforme en 502 pour éviter la confusion avec les routes Laravel
         $finalStatus = ($status === 405) ? 502 : (($status >= 400 && $status < 600) ? $status : 500);
 
         return response()->json([
