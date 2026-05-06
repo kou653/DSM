@@ -16,7 +16,7 @@ class EspeceController extends Controller
 
     public function store(Request $request)
     {
-        abort_unless($request->user()->role === 'administrateur', 403);
+        abort_unless(in_array($request->user()->role, ['administrateur', 'agent terrain']), 403);
 
         $validated = $request->validate([
             'nom_commun' => 'required|string',
@@ -33,7 +33,7 @@ class EspeceController extends Controller
 
     public function update(Request $request, Espece $espece)
     {
-        abort_unless($request->user()->role === 'administrateur', 403);
+        abort_unless(in_array($request->user()->role, ['administrateur', 'agent terrain']), 403);
 
         $validated = $request->validate([
             'nom_commun' => 'sometimes|string',
@@ -61,7 +61,7 @@ class EspeceController extends Controller
 
     public function bulkStore(Request $request)
     {
-        abort_unless($request->user()->role === 'administrateur', 403);
+        abort_unless(in_array($request->user()->role, ['administrateur', 'agent terrain']), 403);
 
         $validated = $request->validate([
             'especes' => 'required|array|min:1',
