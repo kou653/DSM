@@ -27,7 +27,7 @@ class UserController extends Controller
             'password' => 'required|min:8',
             'role' => 'required|in:administrateur,agent terrain,commanditaire',
             'code_acces' => 'nullable|string',
-            'projects' => 'sometimes|array',
+            'projects' => 'required|array|min:1',
             'projects.*' => 'exists:projets,id',
         ]);
 
@@ -55,7 +55,7 @@ class UserController extends Controller
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'code_acces' => 'nullable|string',
             'role' => 'sometimes|in:administrateur,agent terrain,commanditaire',
-            'projects' => 'sometimes|array',
+            'projects' => 'required|array|min:1',
             'projects.*' => 'exists:projets,id',
         ]);
 
