@@ -72,10 +72,32 @@ class ProjetController extends Controller
     {
         $this->authorize('delete', $projet);
 
-        $projet->delete();
+        \DB::transaction(function () use ($projet) {
+            // Supprimer les objectifs liés au projet
+            $projet->objectives()->delete();
+
+            // Détacher les utilisateurs (table pivot projet_user)
+            $projet->users()->detach();
+
+            // Supprimer les images d'évolution liées au projet
+            \App\Models\EvolutionImage::where('projet_id', $projet->id)->delete();
+
+            // Supprimer les plants liés aux parcelles du projet
+            $parcelleIds = $projet->parcelles()->pluck('id');
+            \App\Models\Plant::whereIn('parcelle_id', $parcelleIds)->delete();
+
+            // Supprimer les parcelles liées au projet
+            $projet->parcelles()->delete();
+
+            // Supprimer les coopératives liées au projet
+            $projet->cooperatives()->delete();
+
+            // Enfin, supprimer le projet lui-même
+            $projet->delete();
+        });
 
         return response()->json([
-            'message' => 'Projet supprimé avec succès.',
+            'message' => 'Projet et toutes ses données associées ont été supprimés avec succès.',
         ]);
     }
 
