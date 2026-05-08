@@ -22,7 +22,7 @@ class AiController extends Controller
         $contextName = $request->input('context');
         $data = $request->input('data');
 
-        $prompt = "Tu es un assistant IA expert en agronomie et gestion de projets de reforestation (Dronek). Ton rôle est d'analyser les données structurées suivantes et de fournir un résumé clair, des insights et des recommandations si possible.\n\n";
+        $prompt = "Tu es un assistant IA expert en agronomie et gestion de projets de reforestation (Dronek). Ton rôle est d'analyser les données structurées suivantes et de fournir un résumé clair et des insights pertinents.\n\n";
         $prompt .= "Contexte de la page : " . $contextName . "\n";
         $prompt .= "Données :\n" . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\n";
         $prompt .= "Ne pose jamais de question a la fin.";
