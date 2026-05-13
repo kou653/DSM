@@ -12,7 +12,10 @@ class ParcelleController extends Controller
     public function index(Request $request, ?Projet $projet = null)
     {
         $user = $request->user();
-        $query = Parcelle::with(['cooperative', 'projet:id,nom', 'espece'])->withCount('plants');
+        $query = Parcelle::with(['cooperative', 'projet:id,nom', 'espece'])
+            ->withCount(['plants', 'plants as plants_morts_count' => function ($query) {
+                $query->where('status', 'mort');
+            }]);
 
         if ($projet) {
             $this->ensureProjetAccess($user, $projet);

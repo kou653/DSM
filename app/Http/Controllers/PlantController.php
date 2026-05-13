@@ -79,4 +79,40 @@ class PlantController extends Controller
             'plant' => $plant,
         ]);
     }
+    public function update(Request $request, Plant $plant)
+    {
+        abort_unless($request->user()->role === 'administrateur' || $request->user()->role === 'agent terrain', 403);
+        $plant->loadMissing('parcelle.projet');
+        $this->ensurePlantAccess($request->user(), $plant);
+
+        $validated = $request->validate([
+            'espece_id' => 'sometimes|exists:especes,id',
+            'date_plantation' => 'sometimes|date',
+            'status' => 'sometimes|in:vivant,mort',
+            'lat' => 'sometimes|numeric',
+            'lng' => 'sometimes|numeric',
+        ]);
+
+        $plant->update($validated);
+
+        return response()->json([
+            'message' => 'Plant mis à jour avec succès.',
+            'plant' => $plant,
+        ]);
+    }
+
+    public function destroy(Request $request, Plant $plant)
+    {
+        abort_unless($request->user()->role === 'administrateur' || $request->user()->role === 'agent terrain', 403);
+        $plant->loadMissing('parcelle.projet');
+        $this->ensurePlantAccess($request->user(), $plant);
+
+        $parcelle = $plant->parcelle;
+        $plant->delete();
+        $parcelle->decrement('objectif_atteint');
+
+        return response()->json([
+            'message' => 'Plant supprimé avec succès.',
+        ]);
+    }
 }
