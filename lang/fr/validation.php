@@ -132,7 +132,7 @@ return [
         'status' => 'Statut',
         'nom_commun' => 'Nom commun',
         'nom_scientifique' => 'Nom scientifique',
-        'cooperative_id' => 'Coopérative',
+        'cooperative_id' => 'Coopérative/Particulier',
         'espece_id' => 'Espèce',
         'parcelle_id' => 'Parcelle',
         'superficie' => 'Superficie',

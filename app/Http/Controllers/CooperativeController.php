@@ -44,7 +44,7 @@ class CooperativeController extends Controller
 
         $validated = $request->validate([
             'nom' => 'required|string',
-            'entreprise' => 'required|string',
+            'entreprise' => 'nullable|string',
             'contact' => 'required|string',
             'email' => 'required|email|unique:cooperatives',
             'ville' => 'required|string',
@@ -67,7 +67,7 @@ class CooperativeController extends Controller
 
         $validated = $request->validate([
             'nom' => 'sometimes|string',
-            'entreprise' => 'sometimes|string',
+            'entreprise' => 'sometimes|nullable|string',
             'contact' => 'sometimes|string',
             'email' => 'sometimes|email|unique:cooperatives,email,' . $cooperative->id,
             'ville' => 'sometimes|string',
