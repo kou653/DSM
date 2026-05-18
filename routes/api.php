@@ -67,4 +67,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
     Route::post('/ai/analyze', [AiController::class, 'analyze']);
+    Route::post('/ai/diagnose-plant', [AiController::class, 'diagnosePlant']);
+    Route::post('/ai/diagnose-evolution/{image}', [AiController::class, 'diagnoseEvolutionImage']);
 });
