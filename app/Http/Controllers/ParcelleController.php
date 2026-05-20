@@ -157,7 +157,11 @@ class ParcelleController extends Controller
     {
         $this->authorize('delete', $parcelle);
 
-        $parcelle->delete();
+        \DB::transaction(function () use ($parcelle) {
+            \App\Models\EvolutionImage::where('parcelle_id', $parcelle->id)->delete();
+            \App\Models\Plant::where('parcelle_id', $parcelle->id)->delete();
+            $parcelle->delete();
+        });
 
         return response()->json([
             'message' => 'Parcelle supprimee avec succes.',

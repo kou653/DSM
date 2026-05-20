@@ -12,6 +12,10 @@ class ProjetController extends Controller
         $user = $request->user();
         $query = Projet::query()->withCount('parcelles');
 
+        if ($user->role !== 'administrateur') {
+            $query->whereHas('users', fn($q) => $q->where('users.id', $user->id));
+        }
+
         return response()->json([
             'projets' => $query->get(),
         ]);
@@ -25,8 +29,9 @@ class ProjetController extends Controller
             'nom' => 'required|string',
             'description' => 'required|string',
             'date_debut' => 'required|date',
-            'date_fin' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
             'region' => 'required|string',
+            'status' => 'required|in:actif,termine,en_pause',
             'objectif' => 'nullable|integer|min:1',
         ]);
 

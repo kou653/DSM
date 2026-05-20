@@ -16,7 +16,7 @@ class AiController extends Controller
             'data' => 'required|array',
         ]);
 
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = config('services.gemini.key');
         if (!$apiKey) {
             return response()->json(['message' => 'Clé API Gemini non configurée.'], 500);
         }
@@ -91,7 +91,7 @@ class AiController extends Controller
             'mime_type'    => 'required|string|in:image/jpeg,image/png,image/webp,image/gif',
         ]);
 
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = config('services.gemini.key');
         if (!$apiKey) {
             return response()->json(['message' => 'Clé API Gemini non configurée.'], 500);
         }
@@ -186,7 +186,7 @@ class AiController extends Controller
 
     public function diagnoseEvolutionImage(EvolutionImage $image)
     {
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = config('services.gemini.key');
         if (!$apiKey) {
             return response()->json(['message' => 'Clé API Gemini non configurée.'], 500);
         }
