@@ -31,9 +31,10 @@ class ProjetController extends Controller
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'region' => 'required|string',
-            'status' => 'required|in:actif,termine,en_pause',
             'objectif' => 'nullable|integer|min:1',
         ]);
+
+        $validated['status'] = 'actif';
 
         $projet = Projet::create($validated);
 
