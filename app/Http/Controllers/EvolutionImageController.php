@@ -24,26 +24,37 @@ class EvolutionImageController extends Controller
         $this->authorize('view', $parcelle);
 
         $request->validate([
-            'photo' => 'required|image|max:2048',
-            'description' => 'required|string',
+            'photo'           => 'required|image|max:5120',
+            'description'     => 'required|string',
             'date_observation' => 'required|date',
         ]);
 
-        $path = $request->file('photo')->store('evolutions', 'public');
-        $url = asset('storage/' . $path);
+        // Stockage direct dans public/uploads/evolutions/ — aucun symlink nécessaire
+        $file      = $request->file('photo');
+        $filename  = uniqid('evo_') . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $uploadDir = public_path('uploads/evolutions');
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $file->move($uploadDir, $filename);
+
+        // Stocker le chemin relatif ; l'accesseur du modèle construit l'URL complète
+        $relativePath = 'uploads/evolutions/' . $filename;
 
         $image = EvolutionImage::create([
-            'projet_id' => $parcelle->projet_id,
+            'projet_id'   => $parcelle->projet_id,
             'parcelle_id' => $parcelle->id,
-            'user_id' => $request->user()->id,
-            'url' => $url,
+            'user_id'     => $request->user()->id,
+            'url'         => $relativePath,
             'description' => $request->description,
-            'date' => $request->date_observation,
+            'date'        => $request->date_observation,
         ]);
 
         return response()->json([
             'message' => 'Image ajoutée avec succès.',
-            'image' => $image,
+            'image'   => $image,
         ], 201);
     }
 
@@ -51,9 +62,17 @@ class EvolutionImageController extends Controller
     {
         $this->authorize('delete', $image);
 
-        // Delete from storage if it's a local file
-        $fileName = basename($image->url);
-        Storage::disk('public')->delete('evolutions/' . $fileName);
+        $rawValue = $image->getRawOriginal('url');
+        $filename = basename($rawValue);
+
+        // Nouveau système : public/uploads/evolutions/
+        $uploadPath = public_path('uploads/evolutions/' . $filename);
+        if (file_exists($uploadPath)) {
+            unlink($uploadPath);
+        } else {
+            // Ancien système : storage/app/public/evolutions/
+            Storage::disk('public')->delete('evolutions/' . $filename);
+        }
 
         $image->delete();
 

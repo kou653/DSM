@@ -191,10 +191,17 @@ class AiController extends Controller
             return response()->json(['message' => 'Clé API Gemini non configurée.'], 500);
         }
 
-        // Get the local path of the image. Evolution images are stored in 'public/evolutions' typically.
-        // Assuming url is asset('storage/evolutions/filename.ext'). Let's parse the filename.
-        $fileName = basename($image->url);
-        $path = storage_path('app/public/evolutions/' . $fileName);
+        // Résoudre le chemin physique selon le système de stockage utilisé
+        $rawValue = $image->getRawOriginal('url');
+        $fileName = basename($rawValue);
+
+        // Nouveau système : public/uploads/evolutions/
+        $path = public_path('uploads/evolutions/' . $fileName);
+
+        // Ancien système fallback : storage/app/public/evolutions/
+        if (!file_exists($path)) {
+            $path = storage_path('app/public/evolutions/' . $fileName);
+        }
 
         if (!file_exists($path)) {
             return response()->json(['message' => 'Fichier image introuvable sur le serveur.'], 404);
