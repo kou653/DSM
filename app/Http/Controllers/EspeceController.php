@@ -23,6 +23,14 @@ class EspeceController extends Controller
             'nom_scientifique' => 'required|string',
         ]);
 
+        $exists = Espece::whereRaw('LOWER(nom_commun) = ?', [strtolower($validated['nom_commun'])])->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => "L'espèce \"{$validated['nom_commun']}\" existe déjà.",
+            ], 409);
+        }
+
         $espece = Espece::create($validated);
 
         return response()->json([
@@ -69,15 +77,42 @@ class EspeceController extends Controller
             'especes.*.nom_scientifique' => 'required|string',
         ]);
 
-        $createdCount = 0;
+        $duplicates = [];
+        $toCreate = [];
 
         foreach ($validated['especes'] as $item) {
-            Espece::create($item);
-            $createdCount++;
+            $exists = Espece::whereRaw('LOWER(nom_commun) = ?', [strtolower($item['nom_commun'])])->exists();
+            if ($exists) {
+                $duplicates[] = $item['nom_commun'];
+            } else {
+                $toCreate[] = $item;
+            }
         }
 
-        return response()->json([
-            'message' => "$createdCount especes importees avec succes.",
-        ], 201);
+        // Toutes les espèces existent déjà → rien à enregistrer
+        if (!empty($duplicates) && empty($toCreate)) {
+            $liste = implode(', ', $duplicates);
+            return response()->json([
+                'message' => "Aucune espèce importée. Ces espèces existent déjà : $liste.",
+            ], 409);
+        }
+
+        // Enregistrer uniquement les nouvelles
+        foreach ($toCreate as $item) {
+            Espece::create($item);
+        }
+
+        $createdCount = count($toCreate);
+        $response = [
+            'message' => "$createdCount espèce(s) importée(s) avec succès.",
+        ];
+
+        // Signaler les doublons ignorés
+        if (!empty($duplicates)) {
+            $liste = implode(', ', $duplicates);
+            $response['duplicates_message'] = "Ces espèces existaient déjà et n'ont pas été importées : $liste.";
+        }
+
+        return response()->json($response, 201);
     }
 }
