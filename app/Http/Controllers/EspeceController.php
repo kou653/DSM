@@ -91,9 +91,8 @@ class EspeceController extends Controller
 
         // Toutes les espèces existent déjà → rien à enregistrer
         if (!empty($duplicates) && empty($toCreate)) {
-            $liste = implode(', ', $duplicates);
             return response()->json([
-                'message' => "Aucune espèce importée. Ces espèces existent déjà : $liste.",
+                'message' => "Aucune espèce importée. Ces espèces existent déjà.",
             ], 409);
         }
 
